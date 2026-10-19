@@ -1,0 +1,14 @@
+# Builds e arquivos compilados
+/build/
+/dist/
+/*.class
+
+# Configurações locais do NetBeans
+/nbproject/private/
+
+# Arquivos temporários de sistema operacional
+.DS_Store
+Thumbs.db
+
+# Dados dinamicos de tempo de execucao
+/saves/
