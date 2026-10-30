@@ -4,21 +4,21 @@ package modelo;
 
 public enum TipoPokemon {
     FOGO,
-    ÁGUA,
+    AGUA,
     NORMAL,
-    ELÉTRICO,
+    ELETRICO,
     TERRA,
     PLANTA,
     VOADOR,
-    AÇO,
-    DRAGÃO,
+    ACO,
+    DRAGAO,
     FADA,
     FANTASMA,
     GELO,
     INSETO,
     LUTADOR,
     PEDRA,
-    PSÍQUICO,
+    PSIQUICO,
     SOMBRIO,
     VENENOSO
 }
