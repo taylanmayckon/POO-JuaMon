@@ -1,20 +1,41 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
- */
 package jogo;
 
-/**
+import javax.swing.SwingUtilities;
+
+/*
+ * ITEM 9 - PACOTES
  *
- * @author taylan
+ * O projeto JuaMon está organizado em exatamente dois pacotes:
+ *
+ * jogo   -> contém interface, mapa, controle e execução do jogo.
+ * modelo -> contém entidades e tipos pertencentes ao domínio.
+ *
+ * O projeto deve permanecer com exatamente esses dois pacotes.
  */
 public class JuaMon {
 
-    /**
-     * @param args the command line arguments
+    /*
+     * ÚNICO MÉTODO MAIN DO PROJETO.
+     *
+     * O método main é responsável somente por iniciar
+     * a aplicação.
+     *
+     * ATENÇÃO:
+     * Este método NÃO está sendo utilizado para atender
+     * ao requisito de método static do professor, pois
+     * esse requisito exige outro método static além do main.
      */
     public static void main(String[] args) {
-        // TODO code application logic here
+
+        /*
+         * SwingUtilities.invokeLater garante que a interface
+         * gráfica seja criada na thread apropriada do Swing.
+         */
+        SwingUtilities.invokeLater(() -> {
+
+            JanelaJogo janela = new JanelaJogo();
+
+            janela.setVisible(true);
+        });
     }
-    
 }
