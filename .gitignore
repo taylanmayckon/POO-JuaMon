@@ -12,3 +12,6 @@ Thumbs.db
 
 # Dados dinamicos de tempo de execucao
 /saves/
+
+# Contexto de desenvolvimento
+contexto.md
