@@ -176,7 +176,12 @@ public class PainelMapa extends JPanel implements KeyListener {
 
 
         // Cria o mapa lógico utilizado nas colisões.
-        mapa = new Mapa();
+        /*
+        * 4.1. COMPOSIÇÃO:
+        *
+        * O Todo (PainelMapa) instancia a Parte (Mapa) em seu construtor
+        */
+        mapa = new Mapa(); // O Todo (PainelMapa) instancia a Parte (Mapa) em seu construtor
 
 
         // Tela provisória de batalha.
