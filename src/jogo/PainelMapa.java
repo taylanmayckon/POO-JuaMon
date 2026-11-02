@@ -1,17 +1,20 @@
 package jogo;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Random;
-
 import javax.swing.ImageIcon;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
-
+import javax.swing.SwingUtilities;
+import modelo.CalculadoraDano;
 import modelo.Direcao;
 import modelo.Jogador;
+import modelo.PokemonSelvagem;
 
 
 /*
@@ -64,8 +67,6 @@ public class PainelMapa extends JPanel implements KeyListener {
 
     private boolean encontroPermitido = true;
 
-    private TelaBatalha telaBatalha;
-
 
     // Posição atual da câmera.
     private int cameraX = 0;
@@ -88,7 +89,6 @@ public class PainelMapa extends JPanel implements KeyListener {
      * mapa,
      * sprites,
      * jogador,
-     * batalha provisória
      * e teclado.
      */
     public PainelMapa() {
@@ -184,10 +184,6 @@ public class PainelMapa extends JPanel implements KeyListener {
         mapa = new Mapa(); // O Todo (PainelMapa) instancia a Parte (Mapa) em seu construtor
 
 
-        // Tela provisória de batalha.
-        telaBatalha = new TelaBatalha();
-
-
         // Permite que o painel receba comandos do teclado.
         setFocusable(true);
 
@@ -243,11 +239,16 @@ public class PainelMapa extends JPanel implements KeyListener {
 
             encontroPermitido = false;
 
-            System.out.println(
-                    "Um JuaMon selvagem apareceu!"
-            );
+            // Sorteia um dos 10 Pokémons da pool
+            PokemonSelvagem selvagem = CalculadoraDano.sortearPokemonSelvagem();
 
-            telaBatalha.iniciarBatalha();
+            // Abre a TelaBatalha modal 800x600 bloqueando o mapa
+            JFrame janelaPai = (JFrame) SwingUtilities.getWindowAncestor(this);
+            TelaBatalha telaBatalha = new TelaBatalha(janelaPai, jogador, selvagem);
+            telaBatalha.setVisible(true);
+
+            // Ao fechar a batalha, restaura o foco no teclado para continuar andando
+            this.requestFocusInWindow();
         }
     }
 
