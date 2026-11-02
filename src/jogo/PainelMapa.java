@@ -11,6 +11,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import modelo.CalculadoraDano;
 import modelo.Direcao;
 import modelo.Jogador;
@@ -57,6 +58,23 @@ public class PainelMapa extends JPanel implements KeyListener {
 
     // Controla o quadro atual da animação.
     private int frameAtual = 1;
+
+    // Controla a cadência de passos para a troca suave dos sprites.
+    private int contadorPassosAnimacao = 0;
+
+
+    // Controle contínuo das teclas pressionadas (WASD e Setas) para eliminar o delay do teclado.
+    private boolean teclaCima = false;
+    private boolean teclaBaixo = false;
+    private boolean teclaEsquerda = false;
+    private boolean teclaDireita = false;
+
+    // Velocidade de deslocamento equilibrada em pixels por ciclo (tick).
+    private static final int VELOCIDADE_PASSO = 2;
+
+    // Rastreia o último tile de grama para evitar sorteios repetidos no mesmo bloco.
+    private int ultimoTileGramaX = -1;
+    private int ultimoTileGramaY = -1;
 
 
     private Jogador jogador;
@@ -188,6 +206,14 @@ public class PainelMapa extends JPanel implements KeyListener {
         setFocusable(true);
 
         addKeyListener(this);
+
+
+        /*
+         * Loop contínuo de atualização gráfica e física do mapa (50 FPS).
+         * Elimina completamente o atraso inicial de resposta do sistema operacional.
+         */
+        Timer timerMovimento = new Timer(20, e -> processarMovimentacaoContinua());
+        timerMovimento.start();
     }
 
 
@@ -220,6 +246,122 @@ public class PainelMapa extends JPanel implements KeyListener {
 
 
     /*
+     * Processa a física de movimento, checagem de colisão e
+     * cadência de animação a cada ciclo do loop do jogo.
+     */
+    private void processarMovimentacaoContinua() {
+
+        int deslocamentoX = 0;
+        int deslocamentoY = 0;
+        boolean andando = false;
+
+
+        // Leitura contínua das direções ativas
+        if (teclaCima) {
+
+            jogador.setDirecao(Direcao.CIMA);
+            deslocamentoY -= VELOCIDADE_PASSO;
+            andando = true;
+
+        } else if (teclaBaixo) {
+
+            jogador.setDirecao(Direcao.BAIXO);
+            deslocamentoY += VELOCIDADE_PASSO;
+            andando = true;
+
+        } else if (teclaEsquerda) {
+
+            jogador.setDirecao(Direcao.ESQUERDA);
+            deslocamentoX -= VELOCIDADE_PASSO;
+            andando = true;
+
+        } else if (teclaDireita) {
+
+            jogador.setDirecao(Direcao.DIREITA);
+            deslocamentoX += VELOCIDADE_PASSO;
+            andando = true;
+        }
+
+
+        if (andando) {
+
+            int novoX = jogador.getX() + deslocamentoX;
+            int novoY = jogador.getY() + deslocamentoY;
+
+
+            /*
+             * Consulta Mapa antes de realizar
+             * o movimento.
+             */
+            if (mapa.podeMoverPara(
+                    novoX,
+                    novoY,
+                    TAMANHO_COLISAO,
+                    TAMANHO_COLISAO)) {
+
+                jogador.mover(
+                        deslocamentoX,
+                        deslocamentoY
+                );
+
+
+                // Alterna os quadros do passo com cadência calibrada ao novo ritmo (~180ms)
+                contadorPassosAnimacao++;
+
+                if (contadorPassosAnimacao >= 9) {
+
+                    frameAtual = (frameAtual == 1) ? 2 : 1;
+                    contadorPassosAnimacao = 0;
+                }
+            }
+
+
+            /*
+             * Verifica se o personagem entrou
+             * em uma região de grama alta.
+             */
+            if (mapa.ehGrama(
+                    jogador.getX(),
+                    jogador.getY())) {
+
+                int tileAtualX = jogador.getX() / Mapa.TAMANHO_TILE;
+                int tileAtualY = jogador.getY() / Mapa.TAMANHO_TILE;
+
+                // Só verifica o sorteio se ingressou em uma nova célula da grade
+                if (tileAtualX != ultimoTileGramaX || tileAtualY != ultimoTileGramaY) {
+
+                    ultimoTileGramaX = tileAtualX;
+                    ultimoTileGramaY = tileAtualY;
+
+                    System.out.println(
+                            "Jogador esta na grama alta."
+                    );
+
+                    verificarEncontroAleatorio();
+                }
+
+            } else {
+
+                encontroPermitido = true;
+                ultimoTileGramaX = -1;
+                ultimoTileGramaY = -1;
+            }
+
+
+            atualizarCamera();
+
+            repaint();
+
+        } else {
+
+            // Quando parado, mantém o personagem com postura neutra
+            frameAtual = 1;
+            contadorPassosAnimacao = 0;
+        }
+    }
+
+
+    /*
      * Realiza o sorteio do encontro aleatório.
      */
     private void verificarEncontroAleatorio() {
@@ -238,6 +380,12 @@ public class PainelMapa extends JPanel implements KeyListener {
         if (numero < 15) {
 
             encontroPermitido = false;
+
+            // Limpa as teclas ativas para não continuar caminhando dentro do diálogo
+            teclaCima = false;
+            teclaBaixo = false;
+            teclaEsquerda = false;
+            teclaDireita = false;
 
             // Sorteia um dos 10 Pokémons da pool
             PokemonSelvagem selvagem = CalculadoraDano.sortearPokemonSelvagem();
@@ -455,167 +603,58 @@ public class PainelMapa extends JPanel implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
 
-        int velocidade = 10;
-
-        int deslocamentoX = 0;
-        int deslocamentoY = 0;
-
-        boolean tentouMover = false;
+        int codigo = e.getKeyCode();
 
 
-        // -------------------------
-        // CIMA
-        // -------------------------
+        // Suporte a Setas e teclas WASD
+        if (codigo == KeyEvent.VK_UP || codigo == KeyEvent.VK_W) {
 
-        if (e.getKeyCode() == KeyEvent.VK_UP) {
-
-            jogador.setDirecao(
-                    Direcao.CIMA
-            );
-
-            deslocamentoY = -velocidade;
-
-            tentouMover = true;
+            teclaCima = true;
         }
 
+        if (codigo == KeyEvent.VK_DOWN || codigo == KeyEvent.VK_S) {
 
-        // -------------------------
-        // BAIXO
-        // -------------------------
-
-        if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-
-            jogador.setDirecao(
-                    Direcao.BAIXO
-            );
-
-            deslocamentoY = velocidade;
-
-            tentouMover = true;
+            teclaBaixo = true;
         }
 
+        if (codigo == KeyEvent.VK_LEFT || codigo == KeyEvent.VK_A) {
 
-        // -------------------------
-        // ESQUERDA
-        // -------------------------
-
-        if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-
-            jogador.setDirecao(
-                    Direcao.ESQUERDA
-            );
-
-            deslocamentoX = -velocidade;
-
-            tentouMover = true;
+            teclaEsquerda = true;
         }
 
+        if (codigo == KeyEvent.VK_RIGHT || codigo == KeyEvent.VK_D) {
 
-        // -------------------------
-        // DIREITA
-        // -------------------------
-
-        if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-
-            jogador.setDirecao(
-                    Direcao.DIREITA
-            );
-
-            deslocamentoX = velocidade;
-
-            tentouMover = true;
+            teclaDireita = true;
         }
-
-
-        // Ignora outras teclas.
-        if (!tentouMover) {
-
-            return;
-        }
-
-
-        /*
-         * Calcula a posição que o jogador
-         * pretende ocupar.
-         */
-        int novoX =
-                jogador.getX()
-                + deslocamentoX;
-
-        int novoY =
-                jogador.getY()
-                + deslocamentoY;
-
-
-        /*
-         * Consulta Mapa antes de realizar
-         * o movimento.
-         */
-        if (mapa.podeMoverPara(
-                novoX,
-                novoY,
-                TAMANHO_COLISAO,
-                TAMANHO_COLISAO)) {
-
-
-            jogador.mover(
-                    deslocamentoX,
-                    deslocamentoY
-            );
-
-
-            // Alterna os quadros da caminhada.
-            if (frameAtual == 1) {
-
-                frameAtual = 2;
-
-            } else {
-
-                frameAtual = 1;
-            }
-        }
-
-
-        /*
-         * Verifica se o personagem entrou
-         * em uma região de grama alta.
-         */
-        if (mapa.ehGrama(
-                jogador.getX(),
-                jogador.getY())) {
-
-
-            System.out.println(
-                    "Jogador esta na grama alta."
-            );
-
-
-            verificarEncontroAleatorio();
-
-        } else {
-
-            encontroPermitido = true;
-        }
-
-
-        atualizarCamera();
-
-
-        // Solicita novo desenho da tela.
-        repaint();
     }
 
 
     @Override
     public void keyReleased(KeyEvent e) {
 
-        /*
-         * Quando a tecla é solta,
-         * retorna ao primeiro quadro.
-         */
-        frameAtual = 1;
+        int codigo = e.getKeyCode();
 
-        repaint();
+
+        // Desativa a direção ao soltar a tecla correspondente
+        if (codigo == KeyEvent.VK_UP || codigo == KeyEvent.VK_W) {
+
+            teclaCima = false;
+        }
+
+        if (codigo == KeyEvent.VK_DOWN || codigo == KeyEvent.VK_S) {
+
+            teclaBaixo = false;
+        }
+
+        if (codigo == KeyEvent.VK_LEFT || codigo == KeyEvent.VK_A) {
+
+            teclaEsquerda = false;
+        }
+
+        if (codigo == KeyEvent.VK_RIGHT || codigo == KeyEvent.VK_D) {
+
+            teclaDireita = false;
+        }
     }
 
 
