@@ -101,9 +101,19 @@ public class Pokemon extends Criatura {
         return hpAtual <= 0;
     }
 
+    //Retorna o caminho relativo do sprite de frente (adversário selvagem).
+    public String getSpriteFrente() {
+        return "/assets/pokemon/" + this.id + "/front.png";
+    }
+
+    //Retorna o caminho relativo do sprite de costas (aliado do jogador).
+    public String getSpriteCostas() {
+        return "/assets/pokemon/" + this.id + "/back.png";
+    }
+
     // Retorna o caminho da foto/sprite do Pokémon baseado no ID (1 a 10)
     public String getCaminhoSprite() {
-        return "/imagens/pokemon_" + this.id + ".png";
+        return getSpriteFrente();
     }
 
     // Getters e Setters
