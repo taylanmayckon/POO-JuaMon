@@ -20,7 +20,7 @@ public class Batalha {
         this.pokemonSelvagem = pokemonSelvagem;
         this.parceiroPikachu = jogador.getPokemonInicialParceiro();
 
-        // REGRA #2 DO COMBATE: Todos os Pokémons do treinador começam 100% curados!
+        // REGRA #2 SEU COMBATE: Todos os Pokémons do treinador começam 100% curados!
         List<Pokemon> equipe = jogador.getEquipe();
         curarEquipeParaCombate(equipe.toArray(new Pokemon[0]));
     }
@@ -84,7 +84,7 @@ public class Batalha {
     public boolean tentarCapturarSelvagem() throws CapturaInvalidaException {
         Pokebola pokebolaRetirada = jogador.retirarPokebolaDaMochila();
         if (pokebolaRetirada == null) {
-            throw new CapturaInvalidaException("Você não possui mais Pokébolas no inventário!");
+            throw new CapturaInvalidaException("Voce nao possui mais Pokebolas no inventario!");
         }
 
         // Aciona o polimorfismo de subtipagem (Item 7.3)
@@ -103,7 +103,7 @@ public class Batalha {
     public String usarPocaoNoPokemon(Pokemon pokemonAliado) throws CapturaInvalidaException {
         Pocao pocaoRetirada = jogador.retirarPocaoDaMochila();
         if (pocaoRetirada == null) {
-            throw new CapturaInvalidaException("Você não possui mais Poções de Vida na mochila!");
+            throw new CapturaInvalidaException("Voce nao possui mais Pocoes de Vida na mochila!");
         }
         return utilizarItemPolimorfico(pocaoRetirada, pokemonAliado);
     }

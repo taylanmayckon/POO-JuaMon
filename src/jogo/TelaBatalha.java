@@ -477,6 +477,9 @@ public class TelaBatalha extends JDialog {
             bloquearControles(true);
             SwingUtilities.invokeLater(this::processarTurnoInimigo);
         } catch (CapturaInvalidaException ex) {
+            // ITEM 11.1 - Registro explícito no console/terminal
+            System.err.println("\n[TERMINAL - EXCECAO TRATADA] " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+
             adicionarLinhaLog("⚠️ Inventário vazio: " + ex.getMessage());
             JOptionPane.showMessageDialog(this,
                     ex.getMessage(),
@@ -528,6 +531,13 @@ public class TelaBatalha extends JDialog {
                 SwingUtilities.invokeLater(this::processarTurnoInimigo);
             }
         } catch (CapturaInvalidaException ex) {
+            // ITEM 11.1 - Registro explícito no console/terminal
+            System.err.println("\n=======================================================");
+            System.err.println("[TERMINAL - EXCECAO CAPTURADA E TRATADA COM TRY-CATCH]");
+            System.err.println("Classe da Excecao: " + ex.getClass().getName());
+            System.err.println("Mensagem de Erro : " + ex.getMessage());
+            System.err.println("=======================================================\n");
+
             // ITEM 11.1 - Tratamento da exceção: exibe mensagem explicativa sem encerrar o jogo
             adicionarLinhaLog("⚠️ Erro de Captura: " + ex.getMessage());
             JOptionPane.showMessageDialog(this,
