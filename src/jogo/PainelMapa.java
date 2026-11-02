@@ -190,8 +190,30 @@ public class PainelMapa extends JPanel implements KeyListener {
 
 
         // Cria o jogador inicialmente em região livre.
-        jogador = new Jogador(200, 180);
+        //jogador = new Jogador(200, 180); //Desativei pois agora vou implementar o salvar/carregar
 
+        
+        /*
+        * ITEM 13 - RECUPERAÇÃO E USO DO ARQUIVO
+        *
+        * Ao iniciar o mapa, o programa tenta recuperar
+        * os dados salvos anteriormente.
+        */
+        jogador = GerenciadorArquivo.carregarJogador();
+
+
+        /*
+        * Caso ainda não exista arquivo de save,
+        * cria um novo jogador normalmente.
+        */
+        if (jogador == null) {
+
+            jogador = new Jogador(
+                200,
+                180
+            );
+        }
+        
 
         // Cria o mapa lógico utilizado nas colisões.
         /*
@@ -604,6 +626,28 @@ public class PainelMapa extends JPanel implements KeyListener {
     public void keyPressed(KeyEvent e) {
 
         int codigo = e.getKeyCode();
+        
+        /*
+        * ITEM 13 - GRAVAÇÃO DO ARQUIVO
+        *
+        * Ao pressionar F5, os dados atuais do jogador
+        * são gravados no arquivo de save.
+        */
+        if (codigo == KeyEvent.VK_F5) {
+
+            GerenciadorArquivo.salvarJogador(
+                jogador
+            );
+
+            System.out.println(
+                "Posição salva: "
+                + jogador.getX()
+                + ", "
+                + jogador.getY()
+            );
+
+            return;
+        }
 
 
         // Suporte a Setas e teclas WASD
