@@ -17,7 +17,14 @@ public class Jogador implements Combatente {
     // ITEM 1.4 - ATRIBUTO ARRAYLIST
     private ArrayList<Pokemon> equipe;
     private PokemonInicial pokemonInicialParceiro;
-    private int pokebolas;
+
+    /*
+     * ITEM 7.4 - POLIMORFISMO PARAMÉTRICO (Atributos parametrizados explicitamente)
+     * Justificativa: O jogador possui compartimentos específicos na mochila tipados
+     * explicitamente com <Pokebola> e <Pocao>, garantindo segurança de tipos em tempo de compilação.
+     */
+    private Inventario<Pokebola> compartimentoPokebolas;
+    private Inventario<Pocao> compartimentoPocoes;
 
     // Construtor original mantido por compatibilidade, delegando para a Agregação
     public Jogador(int x, int y) {
@@ -33,11 +40,32 @@ public class Jogador implements Combatente {
         this.x = x;
         this.y = y;
         this.direcao = Direcao.BAIXO;
-        this.pokebolas = 5; // Regra do MVP: Começa com 5 Pokébolas
         this.equipe = new ArrayList<>();
         this.pokemonInicialParceiro = pokemonInicial;
         if (pokemonInicial != null) {
             this.equipe.add(pokemonInicial);
+        }
+
+        // ITEM 7.4 - Instanciação e abastecimento usando métodos parametrizados fora do construtor de Inventario
+        this.compartimentoPokebolas = new Inventario<Pokebola>("Bolso de Pokébolas");
+        this.compartimentoPocoes = new Inventario<Pocao>("Bolso de Poções");
+
+        // Regra do MVP: Começa com 5 Pokébolas e 3 Poções na mochila
+        abastecerInventarioInicial(5, 3);
+    }
+
+    /**
+     * Abastece os compartimentos genéricos chamando armazenarItem(T) fora do construtor.
+     */
+    public final void abastecerInventarioInicial(int qtdPokebolas, int qtdPocoes) {
+        this.compartimentoPokebolas.getItensArmazenados().clear();
+        for (int i = 0; i < qtdPokebolas; i++) {
+            this.compartimentoPokebolas.armazenarItem(new Pokebola());
+        }
+
+        this.compartimentoPocoes.getItensArmazenados().clear();
+        for (int i = 0; i < qtdPocoes; i++) {
+            this.compartimentoPocoes.armazenarItem(new Pocao(35));
         }
     }
 
@@ -60,10 +88,16 @@ public class Jogador implements Combatente {
         this.equipe.add(capturado);
     }
 
+    public Pokebola retirarPokebolaDaMochila() {
+        return this.compartimentoPokebolas.retirarItem();
+    }
+
+    public Pocao retirarPocaoDaMochila() {
+        return this.compartimentoPocoes.retirarItem();
+    }
+
     public void gastarPokebola() {
-        if (this.pokebolas > 0) {
-            this.pokebolas--;
-        }
+        this.compartimentoPokebolas.retirarItem();
     }
 
     public Pokemon getPokemonAtivo() {
@@ -74,13 +108,65 @@ public class Jogador implements Combatente {
         return pokemonInicialParceiro;
     }
 
-    public ArrayList<Pokemon> getEquipe() { return equipe; }
-    public int getPokebolas() { return pokebolas; }
-    public void setPokebolas(int pokebolas) { this.pokebolas = pokebolas; }
-    public String getNome() { return nome; }
-    public void setNome(String nome) { this.nome = nome; }
-    public int getX() { return x; }
-    public int getY() { return y; }
-    public Direcao getDirecao() { return direcao; }
-    public void setDirecao(Direcao direcao) { this.direcao = direcao; }
+    public Inventario<Pokebola> getCompartimentoPokebolas() {
+        return compartimentoPokebolas;
+    }
+
+    public Inventario<Pocao> getCompartimentoPocoes() {
+        return compartimentoPocoes;
+    }
+
+    public ArrayList<Pokemon> getEquipe() {
+        return equipe;
+    }
+
+    public int getPokebolas() {
+        return this.compartimentoPokebolas.obterQuantidade();
+    }
+
+    public void setPokebolas(int pokebolas) {
+        this.compartimentoPokebolas.getItensArmazenados().clear();
+        for (int i = 0; i < pokebolas; i++) {
+            this.compartimentoPokebolas.armazenarItem(new Pokebola());
+        }
+    }
+
+    public int getPocoes() {
+        return this.compartimentoPocoes.obterQuantidade();
+    }
+
+    /**
+     * Atualiza e recarrega o estoque de Poções de Vida no Inventario<Pocao>.
+     * Utilizado para resetar as poções para a quantidade padrão (3) após os combates.
+     */
+    public void setPocoes(int pocoes) {
+        this.compartimentoPocoes.getItensArmazenados().clear();
+        for (int i = 0; i < pocoes; i++) {
+            this.compartimentoPocoes.armazenarItem(new Pocao(35));
+        }
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public Direcao getDirecao() {
+        return direcao;
+    }
+
+    public void setDirecao(Direcao direcao) {
+        this.direcao = direcao;
+    }
 }

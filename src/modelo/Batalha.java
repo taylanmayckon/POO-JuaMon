@@ -20,7 +20,7 @@ public class Batalha {
         this.pokemonSelvagem = pokemonSelvagem;
         this.parceiroPikachu = jogador.getPokemonInicialParceiro();
 
-        // REGRA #2 DO SEU COMBATE: Todos os Pokémons do treinador começam 100% curados!
+        // REGRA #2 DO COMBATE: Todos os Pokémons do treinador começam 100% curados!
         List<Pokemon> equipe = jogador.getEquipe();
         curarEquipeParaCombate(equipe.toArray(new Pokemon[0]));
     }
@@ -46,11 +46,20 @@ public class Batalha {
     }
 
     /*
-     * ITEM 7.3 - POLIMORFISMO DE SUBTIPAGEM (Pai e filhos concretos)
+     * ITEM 7.3 - POLIMORFISMO DE SUBTIPAGEM (Exemplo 1: Pokemon -> PokemonInicial / PokemonSelvagem)
      * Recebe a superclasse concreta Pokemon e opera tanto PokemonInicial quanto PokemonSelvagem.
      */
     public String obterTextoStatus(Pokemon qualquerPokemon) {
         return qualquerPokemon.gerarResumoStatus();
+    }
+
+    /*
+     * ITEM 7.3 - POLIMORFISMO DE SUBTIPAGEM (Exemplo 2: Item -> Pokebola / Pocao)
+     * Recebe a superclasse concreta Item e executa polimorficamente o método aplicarEfeito()
+     * das subclasses concretas Pokebola ou Pocao em tempo de execução.
+     */
+    public String utilizarItemPolimorfico(Item item, Pokemon alvo) {
+        return item.aplicarEfeito(alvo);
     }
 
     /*
@@ -70,16 +79,32 @@ public class Batalha {
 
     /*
      * ITEM 11.1 - LEVANTANDO A EXCEÇÃO PRÓPRIA NA TENTATIVA DE CAPTURA
+     * Consome um objeto Pokebola diretamente do Inventario<Pokebola> do Jogador (Item 7.4).
      */
     public boolean tentarCapturarSelvagem() throws CapturaInvalidaException {
-        if (jogador.getPokebolas() <= 0) {
+        Pokebola pokebolaRetirada = jogador.retirarPokebolaDaMochila();
+        if (pokebolaRetirada == null) {
             throw new CapturaInvalidaException("Você não possui mais Pokébolas no inventário!");
         }
-        jogador.gastarPokebola();
+
+        // Aciona o polimorfismo de subtipagem (Item 7.3)
+        utilizarItemPolimorfico(pokebolaRetirada, pokemonSelvagem);
+
         if (pokemonSelvagem.tentarCaptura()) {
             jogador.adicionarPokemon(pokemonSelvagem);
             return true;
         }
         return false;
+    }
+
+    /**
+     * Consome uma Pocao do Inventario<Pocao> (Item 7.4) e aplica via Subtipagem (Item 7.3).
+     */
+    public String usarPocaoNoPokemon(Pokemon pokemonAliado) throws CapturaInvalidaException {
+        Pocao pocaoRetirada = jogador.retirarPocaoDaMochila();
+        if (pocaoRetirada == null) {
+            throw new CapturaInvalidaException("Você não possui mais Poções de Vida na mochila!");
+        }
+        return utilizarItemPolimorfico(pocaoRetirada, pokemonAliado);
     }
 }
