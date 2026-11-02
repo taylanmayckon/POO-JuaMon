@@ -96,7 +96,7 @@ public class PainelMapa extends JPanel implements KeyListener {
         // Carrega a imagem do mapa.
         ImageIcon imagem = new ImageIcon(
                 getClass().getResource(
-                        "/imagens/mapa_floresta.png"
+                        "/assets/map/mapa_floresta.png"
                 )
         );
 
@@ -109,13 +109,13 @@ public class PainelMapa extends JPanel implements KeyListener {
 
         jogadorFrente1 = new ImageIcon(
                 getClass().getResource(
-                        "/imagens/jogador_frente_1.png"
+                        "/assets/player/jogador_frente_1.png"
                 )
         ).getImage();
 
         jogadorFrente2 = new ImageIcon(
                 getClass().getResource(
-                        "/imagens/jogador_frente_2.png"
+                        "/assets/player/jogador_frente_2.png"
                 )
         ).getImage();
 
@@ -126,13 +126,13 @@ public class PainelMapa extends JPanel implements KeyListener {
 
         jogadorCostas1 = new ImageIcon(
                 getClass().getResource(
-                        "/imagens/jogador_costas_1.png"
+                        "/assets/player/jogador_costas_1.png"
                 )
         ).getImage();
 
         jogadorCostas2 = new ImageIcon(
                 getClass().getResource(
-                        "/imagens/jogador_costas_2.png"
+                        "/assets/player/jogador_costas_2.png"
                 )
         ).getImage();
 
@@ -143,13 +143,13 @@ public class PainelMapa extends JPanel implements KeyListener {
 
         jogadorEsquerda1 = new ImageIcon(
                 getClass().getResource(
-                        "/imagens/jogador_esquerda_1.png"
+                        "/assets/player/jogador_esquerda_1.png"
                 )
         ).getImage();
 
         jogadorEsquerda2 = new ImageIcon(
                 getClass().getResource(
-                        "/imagens/jogador_esquerda_2.png"
+                        "/assets/player/jogador_esquerda_2.png"
                 )
         ).getImage();
 
@@ -160,13 +160,13 @@ public class PainelMapa extends JPanel implements KeyListener {
 
         jogadorDireita1 = new ImageIcon(
                 getClass().getResource(
-                        "/imagens/jogador_direita_1.png"
+                        "/assets/player/jogador_direita_1.png"
                 )
         ).getImage();
 
         jogadorDireita2 = new ImageIcon(
                 getClass().getResource(
-                        "/imagens/jogador_direita_2.png"
+                        "/assets/player/jogador_direita_2.png"
                 )
         ).getImage();
 
