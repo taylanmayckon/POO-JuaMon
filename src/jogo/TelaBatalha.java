@@ -32,6 +32,7 @@ import modelo.PokemonSelvagem;
 
 /**
  * Interface visual refinada do combate por turnos (800x600).
+ * Modularizada para facilitar a inserção de sprites, fundos customizados e áudios.
  */
 public class TelaBatalha extends JDialog {
 
@@ -474,12 +475,23 @@ public class TelaBatalha extends JDialog {
      */
     private class PainelArena extends JPanel {
 
-        // Constantes visuais para calibrar facilmente quando adicionar sprites
+        // Constantes visuais para calibrar facilmente as posições e proporções das bases
         private static final int INIMIGO_X = 520;
         private static final int INIMIGO_Y = 55;
-        private static final int JOGADOR_X = 140;
-        private static final int JOGADOR_Y = 190;
-        private static final int TAMANHO_SPRITE = 160;
+        private static final int JOGADOR_X = 135;
+        private static final int JOGADOR_Y = 180;
+        private static final int TAMANHO_SPRITE = 170;
+
+        // =========================================================================
+        // AJUSTE MANUAL DAS SPRITES (OFFSETS X e Y / CONTROLE ABSOLUTO)
+        // Eixo X: valores positivos movem para a DIREITA, negativos para a ESQUERDA
+        // Eixo Y: valores positivos movem para BAIXO, negativos para CIMA
+        // =========================================================================
+        private static final int DESLOCAMENTO_X_INIMIGO = 0;   // Ajuste horizontal do adversário
+        private static final int DESLOCAMENTO_Y_INIMIGO = 36;  // Ajuste vertical do adversário
+
+        private static final int DESLOCAMENTO_X_JOGADOR = 0;   // Ajuste horizontal do parceiro
+        private static final int DESLOCAMENTO_Y_JOGADOR = 40;  // Ajuste vertical do parceiro
 
         private Image imgInimigo;
         private Image imgJogador;
@@ -489,51 +501,81 @@ public class TelaBatalha extends JDialog {
         }
 
         public void recarregarSprites() {
-            imgInimigo = carregarImagem(inimigo.getCaminhoSprite());
-            imgJogador = carregarImagem(pokemonAtivoJogador.getCaminhoSprite());
+            // Inimigo selvagem é visto de frente; jogador é visto de costas
+            imgInimigo = carregarImagemComFallback(
+                    inimigo.getSpriteFrente(),
+                    "/imagens/pokemon_" + inimigo.getId() + ".png"
+            );
+            imgJogador = carregarImagemComFallback(
+                    pokemonAtivoJogador.getSpriteCostas(),
+                    pokemonAtivoJogador.getSpriteFrente() // Se não tiver a de costas, usa a de frente como reserva
+            );
             repaint();
         }
 
-        private Image carregarImagem(String caminho) {
-            URL url = getClass().getResource(caminho);
+        /**
+         * Carrega a imagem do Classpath com suporte a caminho alternativo de contingência.
+         */
+        private Image carregarImagemComFallback(String caminhoPrincipal, String caminhoAlternativo) {
+            URL url = getClass().getResource(caminhoPrincipal);
+            if (url == null && caminhoAlternativo != null) {
+                url = getClass().getResource(caminhoAlternativo);
+            }
             if (url != null) {
                 return new ImageIcon(url).getImage();
             }
-            return null; // Fallback automático se a sprite ainda não existir
+            return null; // Fallback automático para o avatar circular caso a imagem não exista
         }
 
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2 = (Graphics2D) g;
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-            // 1. Cenário de Fundo (Pronto para substituir por uma imagem de fundo quando quiser)
+            // Ativa renderização precisa e preserva o aspecto nítido de pixel art
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+
+            // 1. Cenário de Fundo (Floresta)
             g2.setColor(new Color(40, 85, 55));
             g2.fillRect(0, 0, getWidth(), getHeight());
 
             // 2. Bases / Plataformas Elípticas de Combate
             g2.setColor(new Color(25, 60, 40));
-            g2.fillOval(INIMIGO_X - 30, INIMIGO_Y + 115, 220, 60);
-            g2.fillOval(JOGADOR_X - 30, JOGADOR_Y + 115, 220, 60);
+            g2.fillOval(INIMIGO_X - 25, INIMIGO_Y + 120, 220, 60);
+            g2.fillOval(JOGADOR_X - 25, JOGADOR_Y + 125, 230, 65);
 
-            // 3. Renderização do Inimigo Selvagem
+            // 3. Renderização do Inimigo Selvagem (Visão Frontal)
             if (imgInimigo != null) {
-                g2.drawImage(imgInimigo, INIMIGO_X, INIMIGO_Y, TAMANHO_SPRITE, TAMANHO_SPRITE, this);
+                g2.drawImage(
+                        imgInimigo,
+                        INIMIGO_X + DESLOCAMENTO_X_INIMIGO,
+                        INIMIGO_Y + DESLOCAMENTO_Y_INIMIGO,
+                        TAMANHO_SPRITE,
+                        TAMANHO_SPRITE,
+                        this
+                );
             } else {
                 g2.setColor(new Color(231, 76, 60));
-                g2.fillOval(INIMIGO_X + 20, INIMIGO_Y + 20, 120, 120);
+                g2.fillOval(INIMIGO_X + 25, INIMIGO_Y + 20, 120, 120);
                 g2.setColor(Color.WHITE);
                 g2.setFont(new Font("SansSerif", Font.BOLD, 13));
                 g2.drawString(inimigo.getNome(), INIMIGO_X + 45, INIMIGO_Y + 85);
             }
 
-            // 4. Renderização do Pokémon do Jogador
+            // 4. Renderização do Pokémon do Jogador (Visão Traseira / Costas)
             if (imgJogador != null) {
-                g2.drawImage(imgJogador, JOGADOR_X, JOGADOR_Y, TAMANHO_SPRITE, TAMANHO_SPRITE, this);
+                g2.drawImage(
+                        imgJogador,
+                        JOGADOR_X + DESLOCAMENTO_X_JOGADOR,
+                        JOGADOR_Y + DESLOCAMENTO_Y_JOGADOR,
+                        TAMANHO_SPRITE,
+                        TAMANHO_SPRITE,
+                        this
+                );
             } else {
                 g2.setColor(new Color(241, 196, 15));
-                g2.fillOval(JOGADOR_X + 20, JOGADOR_Y + 20, 120, 120);
+                g2.fillOval(JOGADOR_X + 25, JOGADOR_Y + 20, 120, 120);
                 g2.setColor(Color.BLACK);
                 g2.setFont(new Font("SansSerif", Font.BOLD, 13));
                 g2.drawString(pokemonAtivoJogador.getNome(), JOGADOR_X + 45, JOGADOR_Y + 85);
