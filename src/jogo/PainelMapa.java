@@ -586,7 +586,7 @@ public class PainelMapa extends JPanel implements KeyListener {
 
 
             System.out.println(
-                    "Jogador está na grama alta."
+                    "Jogador esta na grama alta."
             );
 
 

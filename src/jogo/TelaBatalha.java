@@ -25,6 +25,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import modelo.Batalha;
+import modelo.CapturaInvalidaException;
 import modelo.Golpe;
 import modelo.Jogador;
 import modelo.Pokemon;
@@ -63,6 +64,7 @@ public class TelaBatalha extends JDialog {
     private JPanel painelDireitaAcoes;
     private JPanel painelMenuPrincipal;
     private JPanel painelMenuAtaques;
+    private JPanel painelMenuMochila;
 
     // Elementos do HUD
     private JLabel labelNomeInimigo;
@@ -80,6 +82,8 @@ public class TelaBatalha extends JDialog {
     private JButton btnMochila;
     private JButton btnTrocar;
     private JButton btnFugir;
+    private JButton btnUsarPokebola;
+    private JButton btnUsarPocao;
     private JButton[] botoesGolpes;
 
     /**
@@ -144,6 +148,7 @@ public class TelaBatalha extends JDialog {
 
         construirMenuPrincipal();
         construirMenuAtaques();
+        construirMenuMochila();
 
         painelDireitaAcoes.add(painelMenuPrincipal, BorderLayout.CENTER);
         painelComandos.add(painelDireitaAcoes);
@@ -231,11 +236,7 @@ public class TelaBatalha extends JDialog {
         btnLutar.addActionListener(e -> alternarMenu(true));
 
         btnMochila = criarBotaoEstilizado("🎒 MOCHILA", new Color(40, 167, 69));
-        btnMochila.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this,
-                    "A tela de Inventário será conectada a este botão em breve!",
-                    "Mochila do Treinador", JOptionPane.INFORMATION_MESSAGE);
-        });
+        btnMochila.addActionListener(e -> alternarParaMenuMochila());
 
         btnTrocar = criarBotaoEstilizado("🔄 POKÉMON", new Color(23, 162, 184));
         btnTrocar.addActionListener(e -> abrirDialogoTrocaPokemon());
@@ -277,6 +278,57 @@ public class TelaBatalha extends JDialog {
         JButton btnVoltar = criarBotaoEstilizado("⬅ VOLTAR", new Color(99, 110, 114));
         btnVoltar.addActionListener(e -> alternarMenu(false));
         painelMenuAtaques.add(btnVoltar);
+    }
+
+    /**
+     * Constrói o submenu visual do Inventário Genérico (Item 7.4) diretamente no painel direito.
+     */
+    private void construirMenuMochila() {
+        painelMenuMochila = new JPanel(new GridLayout(3, 1, 6, 6));
+        painelMenuMochila.setOpaque(false);
+
+        btnUsarPokebola = criarBotaoEstilizado(
+                "🔴 LANÇAR POKÉBOLA (Estoque: " + jogador.getPokebolas() + ")",
+                new Color(225, 65, 65)
+        );
+        btnUsarPokebola.addActionListener(e -> {
+            alternarMenu(false);
+            executarTentativaCaptura();
+        });
+
+        btnUsarPocao = criarBotaoEstilizado(
+                "🧪 USAR POÇÃO +35 HP (Estoque: " + jogador.getPocoes() + ")",
+                new Color(46, 160, 110)
+        );
+        btnUsarPocao.addActionListener(e -> {
+            alternarMenu(false);
+            executarUsoDePocao();
+        });
+
+        JButton btnVoltarMochila = criarBotaoEstilizado("⬅ VOLTAR AO MENU", new Color(99, 110, 114));
+        btnVoltarMochila.addActionListener(e -> alternarMenu(false));
+
+        painelMenuMochila.add(btnUsarPokebola);
+        painelMenuMochila.add(btnUsarPocao);
+        painelMenuMochila.add(btnVoltarMochila);
+    }
+
+    private void alternarParaMenuMochila() {
+        if (combateEncerrado) return;
+        atualizarBotoesMochila();
+        painelDireitaAcoes.removeAll();
+        painelDireitaAcoes.add(painelMenuMochila, BorderLayout.CENTER);
+        painelDireitaAcoes.revalidate();
+        painelDireitaAcoes.repaint();
+    }
+
+    private void atualizarBotoesMochila() {
+        if (btnUsarPokebola != null) {
+            btnUsarPokebola.setText("<html><center>🔴 LANÇAR POKÉBOLA (Estoque: " + jogador.getPokebolas() + ")</center></html>");
+        }
+        if (btnUsarPocao != null) {
+            btnUsarPocao.setText("<html><center>🧪 USAR POÇÃO +35 HP (Estoque: " + jogador.getPocoes() + ")</center></html>");
+        }
     }
 
     private JButton criarBotaoEstilizado(String texto, Color corFundo) {
@@ -407,11 +459,111 @@ public class TelaBatalha extends JDialog {
         }
     }
 
+    /**
+     * Executa o uso de uma Poção de Vida retirada do Inventario<Pocao> (Itens 7.3, 7.4 e 11.1).
+     */
+    private void executarUsoDePocao() {
+        if (combateEncerrado) return;
+
+        contadorTurno++;
+        adicionarSeparadorTurno(contadorTurno);
+
+        try {
+            String resultadoCura = batalha.usarPocaoNoPokemon(pokemonAtivoJogador);
+            adicionarLinhaLog("🧪 " + resultadoCura);
+            atualizarHuds();
+
+            // Usar item na batalha consome o turno do jogador; o inimigo ataca em seguida
+            bloquearControles(true);
+            SwingUtilities.invokeLater(this::processarTurnoInimigo);
+        } catch (CapturaInvalidaException ex) {
+            // ITEM 11.1 - Registro explícito no console/terminal
+            System.err.println("\n[TERMINAL - EXCECAO TRATADA] " + ex.getClass().getSimpleName() + ": " + ex.getMessage());
+
+            adicionarLinhaLog("⚠️ Inventário vazio: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this,
+                    ex.getMessage(),
+                    "Mochila — Sem Poções", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /*
+     * ITEM 11.1 - EXCEÇÃO PRÓPRIA (Tratada com bloco try-catch)
+     *
+     * Justificativa: A classe CapturaInvalidaException (criada no pacote modelo herdando de Exception)
+     * é levantada com o comando 'throw' em Batalha.java quando o método tentarCapturarSelvagem() 
+     * detecta que o estoque de Pokébolas do jogador se esgotou (pokebolas <= 0).
+     *
+     * Aqui na TelaBatalha.java, o bloco try-catch intercepta a exceção e impede que a aplicação 
+     * apresente erros não tratados em tempo de execução, notificando o usuário por meio de uma
+     * caixa de diálogo de erro amigável.
+     */
+    private void executarTentativaCaptura() {
+        if (combateEncerrado) return;
+
+        contadorTurno++;
+        adicionarSeparadorTurno(contadorTurno);
+
+        try {
+            adicionarLinhaLog("🔴 Você arremessou uma Pokébola!");
+            boolean capturado = batalha.tentarCapturarSelvagem();
+
+            if (capturado) {
+                adicionarLinhaLog("🎉 SUCESSO! " + inimigo.getNome() + " selvagem foi capturado!");
+                adicionarLinhaLog(inimigo.getNome() + " foi adicionado à sua equipe!");
+                atualizarHuds();
+                JOptionPane.showMessageDialog(this,
+                        "Incrível! O " + inimigo.getNome() + " foi capturado com sucesso e entrou na sua equipe!",
+                        "Captura Bem-Sucedida", JOptionPane.INFORMATION_MESSAGE);
+                combateEncerrado = true;
+                dispose();
+            } else {
+                adicionarLinhaLog("❌ A Pokébola quebrou! " + inimigo.getNome() + " escapou!");
+                adicionarLinhaLog("💡 Dica: Reduza a vida dele para 20% ou menos para ter 100% de chance!");
+                atualizarHuds();
+                JOptionPane.showMessageDialog(this,
+                        "O " + inimigo.getNome() + " escapou da Pokébola!\n"
+                        + "Dica: Reduza o HP dele para menos de 20% para garantir a captura!",
+                        "Captura Falhou", JOptionPane.WARNING_MESSAGE);
+
+                // Como a captura falhou, o turno é consumido e o inimigo ataca em seguida
+                bloquearControles(true);
+                SwingUtilities.invokeLater(this::processarTurnoInimigo);
+            }
+        } catch (CapturaInvalidaException ex) {
+            // ITEM 11.1 - Registro explícito no console/terminal
+            System.err.println("\n=======================================================");
+            System.err.println("[TERMINAL - EXCECAO CAPTURADA E TRATADA COM TRY-CATCH]");
+            System.err.println("Classe da Excecao: " + ex.getClass().getName());
+            System.err.println("Mensagem de Erro : " + ex.getMessage());
+            System.err.println("=======================================================\n");
+
+            // ITEM 11.1 - Tratamento da exceção: exibe mensagem explicativa sem encerrar o jogo
+            adicionarLinhaLog("⚠️ Erro de Captura: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this,
+                    ex.getMessage() + "\nVocê precisa de Pokébolas na mochila para capturar!",
+                    "Atenção — Sem Pokébolas", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
     private void fugirCombate() {
         adicionarLinhaLog("💨 Você escapou com sucesso da batalha!");
         JOptionPane.showMessageDialog(this, "Você fugiu da batalha em segurança!", "Fuga", JOptionPane.INFORMATION_MESSAGE);
         combateEncerrado = true;
         dispose();
+    }
+
+    /**
+     * Sobrescreve o fechamento da janela de batalha para garantir que,
+     * independentemente do desfecho (vitória, derrota, fuga ou captura),
+     * o estoque de Poções do jogador seja restaurado para 3 unidades.
+     */
+    @Override
+    public void dispose() {
+        if (jogador != null) {
+            jogador.setPocoes(3);
+        }
+        super.dispose();
     }
 
     private void finalizarComDialogo(String msg) {
@@ -447,6 +599,7 @@ public class TelaBatalha extends JDialog {
                 ? String.format(" [ATQ: %.2fx]", pokemonAtivoJogador.getMultiplicadorAtaque()) : "";
         labelHpTextoJogador.setText("HP: " + pokemonAtivoJogador.getHpAtual() + " / " + pokemonAtivoJogador.getHpMaximo() + buffTexto);
 
+        atualizarBotoesMochila();
         painelArena.repaint();
     }
 
@@ -488,10 +641,10 @@ public class TelaBatalha extends JDialog {
         // Eixo Y: valores positivos movem para BAIXO, negativos para CIMA
         // =========================================================================
         private static final int DESLOCAMENTO_X_INIMIGO = 0;   // Ajuste horizontal do adversário
-        private static final int DESLOCAMENTO_Y_INIMIGO = 36;  // Ajuste vertical do adversário
+        private static final int DESLOCAMENTO_Y_INIMIGO = 48;  // Ajuste vertical do adversário
 
         private static final int DESLOCAMENTO_X_JOGADOR = 0;   // Ajuste horizontal do parceiro
-        private static final int DESLOCAMENTO_Y_JOGADOR = 40;  // Ajuste vertical do parceiro
+        private static final int DESLOCAMENTO_Y_JOGADOR = 48;  // Ajuste vertical do parceiro
 
         private Image imgInimigo;
         private Image imgJogador;
