@@ -9,8 +9,8 @@ package modelo;
  */
 public class PokemonInicial extends Pokemon implements Combatente {
 
-    public PokemonInicial(int id, String nome, TipoPokemon tipo, int hpMaximo, int ataque, int defesa, int nivel, int velocidade) {
-        super(id, nome, tipo, hpMaximo, hpMaximo, ataque, defesa, nivel, 0, velocidade, false);
+    public PokemonInicial(int id, String nome, TipoPokemon tipo, int hpMaximo, int ataque, int defesa, int nivel) {
+        super(id, nome, tipo, hpMaximo, hpMaximo, ataque, defesa, nivel, false);
     }
 
     @Override

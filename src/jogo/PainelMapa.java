@@ -191,7 +191,6 @@ public class PainelMapa extends JPanel implements KeyListener {
 
         // Cria o jogador inicialmente em região livre.
         //jogador = new Jogador(200, 180); //Desativei pois agora vou implementar o salvar/carregar
-
         
         /*
         * ITEM 13 - RECUPERAÇÃO E USO DO ARQUIVO
@@ -228,6 +227,10 @@ public class PainelMapa extends JPanel implements KeyListener {
         setFocusable(true);
 
         addKeyListener(this);
+
+
+        // Inicia a trilha sonora de exploracao em loop continuo
+        GerenciadorAudio.iniciarMusicaEmLoop(GerenciadorAudio.MUSICA_EXPLORACAO, -8.0f);
 
 
         /*
@@ -417,7 +420,8 @@ public class PainelMapa extends JPanel implements KeyListener {
             TelaBatalha telaBatalha = new TelaBatalha(janelaPai, jogador, selvagem);
             telaBatalha.setVisible(true);
 
-            // Ao fechar a batalha, restaura o foco no teclado para continuar andando
+            // Ao fechar a batalha, retoma a musica de exploracao e restaura o foco no teclado
+            GerenciadorAudio.iniciarMusicaEmLoop(GerenciadorAudio.MUSICA_EXPLORACAO, -8.0f);
             this.requestFocusInWindow();
         }
     }
@@ -640,7 +644,7 @@ public class PainelMapa extends JPanel implements KeyListener {
             );
 
             System.out.println(
-                "Posição salva: "
+                "Posicao salva: "
                 + jogador.getX()
                 + ", "
                 + jogador.getY()
