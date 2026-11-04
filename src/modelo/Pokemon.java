@@ -14,7 +14,7 @@ public class Pokemon extends Criatura {
      * ITEM 1.1 (Encapsulamento: todos private)
      * ITEM 1.2 (String, int e float não estáticos na mesma classe):
      * - String: nome
-     * - int: id, hpMaximo, hpAtual, ataque, defesa, nivel, taxaCaptura, velocidade
+     * - int: id, hpMaximo, hpAtual, ataque, defesa, nivel
      * - float: multiplicadorAtaque (usado pelo 4º ataque de Buff!)
      */
     private int id; // 1 a 10 (define qual sprite será carregada no combate)
@@ -25,8 +25,6 @@ public class Pokemon extends Criatura {
     private int ataque;
     private int defesa;
     private int nivel;
-    private int taxaCaptura;
-    private int velocidade;
     private float multiplicadorAtaque;
 
     /*
@@ -35,7 +33,7 @@ public class Pokemon extends Criatura {
      */
     private ArrayList<Golpe> golpes;
 
-    public Pokemon(int id, String nome, TipoPokemon tipo, int hpMaximo, int hpAtual, int ataque, int defesa, int nivel, int taxaCaptura, int velocidade, boolean selvagem) {
+    public Pokemon(int id, String nome, TipoPokemon tipo, int hpMaximo, int hpAtual, int ataque, int defesa, int nivel, boolean selvagem) {
         super(selvagem);
         this.id = id;
         this.nome = nome;
@@ -45,8 +43,6 @@ public class Pokemon extends Criatura {
         this.ataque = ataque;
         this.defesa = defesa;
         this.nivel = nivel;
-        this.taxaCaptura = taxaCaptura;
-        this.velocidade = velocidade;
         this.multiplicadorAtaque = 1.0f;
         this.golpes = new ArrayList<>();
     }
@@ -101,17 +97,22 @@ public class Pokemon extends Criatura {
         return hpAtual <= 0;
     }
 
-    //Retorna o caminho relativo do sprite de frente (adversário selvagem).
+    // Retorna o caminho relativo do sprite de frente (adversário selvagem).
     public String getSpriteFrente() {
         return "/assets/pokemon/" + this.id + "/front.png";
     }
 
-    //Retorna o caminho relativo do sprite de costas (aliado do jogador).
+    // Retorna o caminho relativo do sprite de costas (aliado do jogador).
     public String getSpriteCostas() {
         return "/assets/pokemon/" + this.id + "/back.png";
     }
 
-    // Retorna o caminho da foto/sprite do Pokémon baseado no ID (1 a 10)
+    // Retorna o caminho relativo do som de grito (cry) do Pokemon.
+    public String getSomGrito() {
+        return "/assets/audio/grito/" + this.id + ".wav";
+    }
+
+    // Retorna o caminho da foto/sprite do Pokemon baseado no ID (1 a 10)
     public String getCaminhoSprite() {
         return getSpriteFrente();
     }
@@ -132,10 +133,6 @@ public class Pokemon extends Criatura {
     public void setDefesa(int defesa) { this.defesa = defesa; }
     public int getNivel() { return nivel; }
     public void setNivel(int nivel) { this.nivel = nivel; }
-    public int getTaxaCaptura() { return taxaCaptura; }
-    public void setTaxaCaptura(int taxaCaptura) { this.taxaCaptura = taxaCaptura; }
-    public int getVelocidade() { return velocidade; }
-    public void setVelocidade(int velocidade) { this.velocidade = velocidade; }
     public float getMultiplicadorAtaque() { return multiplicadorAtaque; }
     public ArrayList<Golpe> getGolpes() { return golpes; }
 }

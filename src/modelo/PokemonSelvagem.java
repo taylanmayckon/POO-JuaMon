@@ -6,8 +6,8 @@ package modelo;
  */
 public class PokemonSelvagem extends Pokemon implements Combatente, Capturavel {
 
-    public PokemonSelvagem(int id, String nome, TipoPokemon tipo, int hpMaximo, int ataque, int defesa, int nivel, int taxaCaptura, int velocidade) {
-        super(id, nome, tipo, hpMaximo, hpMaximo, ataque, defesa, nivel, taxaCaptura, velocidade, true);
+    public PokemonSelvagem(int id, String nome, TipoPokemon tipo, int hpMaximo, int ataque, int defesa, int nivel) {
+        super(id, nome, tipo, hpMaximo, hpMaximo, ataque, defesa, nivel, true);
     }
 
     @Override
@@ -17,7 +17,7 @@ public class PokemonSelvagem extends Pokemon implements Combatente, Capturavel {
 
     @Override
     public boolean tentarCaptura() {
-        // Regra do MVP: 100% de chance se a vida estiver abaixo ou igual a 20% 
+        // Regra do MVP: 100% de chance se a vida estiver abaixo ou igual a 20%
         return obterPorcentagemHp() <= 20.0f;
     }
 }

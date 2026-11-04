@@ -32,6 +32,8 @@ public class GerenciadorArquivo {
      * Posteriormente os dados são recuperados e utilizados
      * para reconstruir o estado real do jogador.
      */
+    private static final String PASTA_SAVES = "saves";
+
     private static final String NOME_ARQUIVO = "save_jogador.txt";
 
 
@@ -43,9 +45,21 @@ public class GerenciadorArquivo {
      */
     public static void salvarJogador(Jogador jogador) {
 
+        // Garante que o diretório saves/ exista antes de salvar
+        File pasta = new File(PASTA_SAVES);
+
+        if (!pasta.exists()) {
+
+            pasta.mkdirs();
+        }
+
+
+        File arquivo = new File(pasta, NOME_ARQUIVO);
+
+
         try (BufferedWriter escritor =
                 new BufferedWriter(
-                        new FileWriter(NOME_ARQUIVO))) {
+                        new FileWriter(arquivo))) {
 
             // -------------------------
             // DADOS DO JOGADOR
@@ -127,7 +141,8 @@ public class GerenciadorArquivo {
 
 
             System.out.println(
-                    "Jogo salvo com sucesso."
+                    "Jogo salvo com sucesso em "
+                    + arquivo.getPath()
             );
 
 
@@ -166,7 +181,7 @@ public class GerenciadorArquivo {
     public static Jogador carregarJogador() {
 
         File arquivo =
-                new File(NOME_ARQUIVO);
+                new File(PASTA_SAVES, NOME_ARQUIVO);
 
 
         /*
@@ -178,7 +193,8 @@ public class GerenciadorArquivo {
         if (!arquivo.exists()) {
 
             System.out.println(
-                    "Nenhum arquivo de save encontrado."
+                    "Nenhum arquivo de save encontrado em "
+                    + arquivo.getPath()
             );
 
             return null;
@@ -450,7 +466,8 @@ public class GerenciadorArquivo {
             // -------------------------
 
             System.out.println(
-                    "Save carregado com sucesso."
+                    "Save carregado com sucesso de "
+                    + arquivo.getPath()
             );
 
 
