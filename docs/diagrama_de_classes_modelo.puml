@@ -1,0 +1,46 @@
+@startuml
+abstract class modelo.Criatura
+abstract class modelo.Golpe
+annotation java.lang.Override
+class java.lang.Exception
+class java.util.ArrayList
+class java.util.List
+class java.util.Random
+class modelo.Batalha
+class modelo.CalculadoraDano
+class modelo.CapturaInvalidaException
+class modelo.GolpeBuff
+class modelo.GolpeDano
+class modelo.Inventario
+class modelo.Item
+class modelo.Jogador
+class modelo.Pocao
+class modelo.Pokebola
+class modelo.Pokemon
+class modelo.PokemonInicial
+class modelo.PokemonSelvagem
+enum modelo.Direcao
+enum modelo.TipoPokemon
+interface modelo.Capturavel
+interface modelo.Combatente
+modelo.CapturaInvalidaException --|> java.lang.Exception
+modelo.GolpeBuff --|> modelo.Golpe
+modelo.GolpeBuff ..> java.lang.Override
+modelo.GolpeDano --|> modelo.Golpe
+modelo.GolpeDano ..> java.lang.Override
+modelo.Jogador ..> java.lang.Override
+modelo.Jogador --|> modelo.Combatente
+modelo.Pocao ..> java.lang.Override
+modelo.Pocao --|> modelo.Item
+modelo.Pokebola ..> java.lang.Override
+modelo.Pokebola --|> modelo.Item
+modelo.Pokemon --|> modelo.Criatura
+modelo.Pokemon ..> java.lang.Override
+modelo.PokemonInicial ..> java.lang.Override
+modelo.PokemonInicial --|> modelo.Pokemon
+modelo.PokemonInicial --|> modelo.Combatente
+modelo.PokemonSelvagem ..> java.lang.Override
+modelo.PokemonSelvagem --|> modelo.Pokemon
+modelo.PokemonSelvagem --|> modelo.Capturavel
+modelo.PokemonSelvagem --|> modelo.Combatente
+@enduml

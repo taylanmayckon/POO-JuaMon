@@ -1,0 +1,65 @@
+@startuml
+annotation java.lang.Override
+class java.awt.BorderLayout
+class java.awt.Color
+class java.awt.Dimension
+class java.awt.Font
+class java.awt.Graphics
+class java.awt.Graphics2D
+class java.awt.GridLayout
+class java.awt.Image
+class java.awt.RenderingHints
+class java.awt.event.KeyEvent
+class java.io.BufferedInputStream
+class java.io.BufferedReader
+class java.io.BufferedWriter
+class java.io.File
+class java.io.FileReader
+class java.io.FileWriter
+class java.io.IOException
+class java.io.InputStream
+class java.net.URL
+class java.util.ArrayList
+class java.util.Random
+class javax.sound.sampled.AudioInputStream
+class javax.sound.sampled.AudioSystem
+class javax.sound.sampled.Clip
+class javax.sound.sampled.FloatControl
+class javax.swing.BorderFactory
+class javax.swing.ImageIcon
+class javax.swing.JButton
+class javax.swing.JDialog
+class javax.swing.JFrame
+class javax.swing.JLabel
+class javax.swing.JOptionPane
+class javax.swing.JPanel
+class javax.swing.JProgressBar
+class javax.swing.JScrollPane
+class javax.swing.JTextArea
+class javax.swing.SwingConstants
+class javax.swing.SwingUtilities
+class javax.swing.Timer
+class jogo.GerenciadorArquivo
+class jogo.GerenciadorAudio
+class jogo.JanelaJogo
+class jogo.JuaMon
+class jogo.Mapa
+class jogo.PainelMapa
+class jogo.TelaBatalha
+class modelo.Batalha
+class modelo.CalculadoraDano
+class modelo.CapturaInvalidaException
+class modelo.Direcao
+class modelo.Golpe
+class modelo.Jogador
+class modelo.Pokemon
+class modelo.PokemonInicial
+class modelo.PokemonSelvagem
+interface java.awt.event.KeyListener
+jogo.JanelaJogo --|> javax.swing.JFrame
+jogo.PainelMapa ..> java.lang.Override
+jogo.PainelMapa --|> javax.swing.JPanel
+jogo.PainelMapa --|> java.awt.event.KeyListener
+jogo.TelaBatalha ..> java.lang.Override
+jogo.TelaBatalha --|> javax.swing.JDialog
+@enduml
